@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from .baseapi import BaseAPI, GET, POST, DELETE
+from .Action import Action
 
 
 class FloatingIP(BaseAPI):
@@ -57,6 +58,21 @@ class FloatingIP(BaseAPI):
             self.region = data['floating_ip']['region']
 
         return self
+
+    def get_actions(self):
+        """
+        Returns a list of Action objects
+        This actions can be used to check the droplet's status
+        """
+        answer = self.get_data("floating_ips/%s/actions/" % self.ip, type=GET)
+
+        actions = []
+        for action_dict in answer['actions']:
+            action = Action(**action_dict)
+            action.token = self.tokens
+            action.load()
+            actions.append(action)
+        return actions
 
     def reserve(self, *args, **kwargs):
         """
